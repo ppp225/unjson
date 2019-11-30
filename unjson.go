@@ -9,6 +9,19 @@ import (
 	"strings"
 )
 
+// LoadFile reads file from disk and unmarshalls
+func LoadFile(filename string) interface{} {
+	jsonFile, err := os.Open(filename)
+	if err != nil {
+		panic(err)
+	}
+
+	jsonBytes, _ := ioutil.ReadAll(jsonFile)
+	var jsonData interface{}
+	json.Unmarshal(jsonBytes, &jsonData)
+	return jsonData
+}
+
 // Getf opens file and returns object found in path
 func Getf(filename, path string) interface{} {
 	jsonFile, err := os.Open(filename)
