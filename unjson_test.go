@@ -17,6 +17,16 @@ func BenchmarkParser(b *testing.B) {
 	b.StopTimer()
 }
 
+func BenchmarkParserDotNotation(b *testing.B) {
+	path := "audits.screenshot-thumbnails.details.items[3].timing"
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		_ = parsePath2DotNotation(path)
+	}
+	b.StopTimer()
+}
+
 func BenchmarkCaster(b *testing.B) {
 	jsonFile, err := os.Open("benchmark/large.json")
 	if err != nil {
@@ -33,6 +43,23 @@ func BenchmarkCaster(b *testing.B) {
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		_ = deeper(mydata, s...)
+	}
+	b.StopTimer()
+}
+
+func BenchmarkMarshalling(b *testing.B) {
+	jsonFile, err := os.Open("benchmark/large.json")
+	if err != nil {
+		panic(err)
+	}
+
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	var mydata interface{}
+	json.Unmarshal(byteValue, &mydata)
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		json.Unmarshal(byteValue, &mydata)
 	}
 	b.StopTimer()
 }

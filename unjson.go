@@ -1,49 +1,40 @@
 package unjson
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/tidwall/gjson"
 )
 
 // LoadFile reads file from disk and unmarshalls
-func LoadFile(filename string) interface{} {
+func LoadFile(filename string) string {
 	jsonFile, err := os.Open(filename)
 	if err != nil {
 		panic(err)
 	}
 
 	jsonBytes, _ := ioutil.ReadAll(jsonFile)
-	var jsonData interface{}
-	json.Unmarshal(jsonBytes, &jsonData)
-	return jsonData
-}
-
-// Getf opens file and returns object found in path
-func Getf(filename, path string) interface{} {
-	jsonFile, err := os.Open(filename)
-	if err != nil {
-		panic(err)
-	}
-
-	jsonBytes, _ := ioutil.ReadAll(jsonFile)
-	var jsonData interface{}
-	json.Unmarshal(jsonBytes, &jsonData)
-
-	s := parseJsonPath(path)
-
-	sth := deeper(jsonData, s...)
-	return sth
+	// var jsonData interface{}
+	// json.Unmarshal(jsonBytes, &jsonData)
+	return string(jsonBytes[:])
 }
 
 // Get returns object found in path
-func Get(data interface{}, path string) interface{} {
-	s := parseJsonPath(path)
-	sth := deeper(data, s...)
-	return sth
+func Get(data string, path string) interface{} {
+	dotPath := parsePath2DotNotation(path)
+	tmp := gjson.Get(data, dotPath)
+	return tmp.Value()
+}
+
+func parsePath2DotNotation(path string) (result string) {
+	result = strings.ReplaceAll(path, "[", ".")
+	result = strings.ReplaceAll(result, "]", "")
+
+	return
 }
 
 func parseJsonPath(path string) []string {

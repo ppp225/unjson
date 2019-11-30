@@ -1,7 +1,6 @@
 package benchmark
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -10,15 +9,8 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-func Benchmark_LargeFile_UntypedJSON(b *testing.B) {
-	jsonFile, err := os.Open("large.json")
-	if err != nil {
-		panic(err)
-	}
-
-	byteValue, _ := ioutil.ReadAll(jsonFile)
-	var mydata interface{}
-	json.Unmarshal(byteValue, &mydata)
+func Benchmark_LargeFile_unjson(b *testing.B) {
+	data := unjson.LoadFile("large.json")
 
 	path1 := "categories.performance.score"
 	path2 := "audits.screenshot-thumbnails.details.items"
@@ -26,9 +18,9 @@ func Benchmark_LargeFile_UntypedJSON(b *testing.B) {
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		_ = unjson.Get(mydata, path1)
-		_ = unjson.Get(mydata, path2)
-		_ = unjson.Get(mydata, path3)
+		_ = unjson.Get(data, path1)
+		_ = unjson.Get(data, path2)
+		_ = unjson.Get(data, path3)
 	}
 	b.StopTimer()
 }
@@ -40,8 +32,6 @@ func Benchmark_LargeFile_GJson(b *testing.B) {
 	}
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)
-	var mydata interface{}
-	json.Unmarshal(byteValue, &mydata)
 
 	path1 := "categories.performance.score"
 	path2 := "audits.screenshot-thumbnails.details.items"
@@ -50,22 +40,18 @@ func Benchmark_LargeFile_GJson(b *testing.B) {
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		_ = gjson.Get(myString, path1)
-		_ = gjson.Get(myString, path2)
-		_ = gjson.Get(myString, path3)
+		tmp := gjson.Get(myString, path1)
+		_ = tmp.Value()
+		tmp = gjson.Get(myString, path2)
+		_ = tmp.Value()
+		tmp = gjson.Get(myString, path3)
+		_ = tmp.Value()
 	}
 	b.StopTimer()
 }
 
-func Benchmark_SmallFile_UntypedJSON(b *testing.B) {
-	jsonFile, err := os.Open("small.json")
-	if err != nil {
-		panic(err)
-	}
-
-	byteValue, _ := ioutil.ReadAll(jsonFile)
-	var mydata interface{}
-	json.Unmarshal(byteValue, &mydata)
+func Benchmark_SmallFile_unjson(b *testing.B) {
+	data := unjson.LoadFile("large.json")
 
 	path1 := "widget.window.name"
 	path2 := "widget.image.hOffset"
@@ -73,9 +59,9 @@ func Benchmark_SmallFile_UntypedJSON(b *testing.B) {
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		_ = unjson.Get(mydata, path1)
-		_ = unjson.Get(mydata, path2)
-		_ = unjson.Get(mydata, path3)
+		_ = unjson.Get(data, path1)
+		_ = unjson.Get(data, path2)
+		_ = unjson.Get(data, path3)
 	}
 	b.StopTimer()
 }
@@ -87,8 +73,6 @@ func Benchmark_SmallFile_GJson(b *testing.B) {
 	}
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)
-	var mydata interface{}
-	json.Unmarshal(byteValue, &mydata)
 
 	path1 := "widget.window.name"
 	path2 := "widget.image.hOffset"
@@ -97,9 +81,12 @@ func Benchmark_SmallFile_GJson(b *testing.B) {
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		_ = gjson.Get(myString, path1)
-		_ = gjson.Get(myString, path2)
-		_ = gjson.Get(myString, path3)
+		tmp := gjson.Get(myString, path1)
+		_ = tmp.Value()
+		tmp = gjson.Get(myString, path2)
+		_ = tmp.Value()
+		tmp = gjson.Get(myString, path3)
+		_ = tmp.Value()
 	}
 	b.StopTimer()
 }
