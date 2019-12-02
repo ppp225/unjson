@@ -4,20 +4,11 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 )
 
-func BenchmarkParser(b *testing.B) {
-	path := "audits.screenshot-thumbnails.details.items[3].timing"
-
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		_ = parseJsonPath(path)
-	}
-	b.StopTimer()
-}
-
-func BenchmarkParserDotNotation(b *testing.B) {
+func BenchmarkParserBracket(b *testing.B) {
 	path := "audits.screenshot-thumbnails.details.items[3].timing"
 
 	b.ResetTimer()
@@ -27,39 +18,47 @@ func BenchmarkParserDotNotation(b *testing.B) {
 	b.StopTimer()
 }
 
-func BenchmarkCaster(b *testing.B) {
-	jsonFile, err := os.Open("benchmark/large.json")
-	if err != nil {
-		panic(err)
-	}
-
-	byteValue, _ := ioutil.ReadAll(jsonFile)
-	var mydata interface{}
-	json.Unmarshal(byteValue, &mydata)
-
-	path := "audits.screenshot-thumbnails.details.items[3].timing"
-	s := parseJsonPath(path)
+func BenchmarkParserDot(b *testing.B) {
+	path := "audits.screenshot-thumbnails.details.items.3.timing"
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		_ = deeper(mydata, s...)
+		_ = parsePath2DotNotation(path)
 	}
 	b.StopTimer()
 }
 
-func BenchmarkMarshalling(b *testing.B) {
+func BenchmarkGJson(b *testing.B) {
+	data := LoadFile("benchmark/large.json")
+
+	path := "audits.screenshot-thumbnails.details.items[3].timing"
+	s := parsePath2DotNotation(path)
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		_ = Get(data, s)
+	}
+	b.StopTimer()
+}
+
+func BenchmarkRecurse(b *testing.B) {
+	path := "audits.screenshot-thumbnails.details.items[3].timing"
+	s := parsePath2DotNotation(path)
+
 	jsonFile, err := os.Open("benchmark/large.json")
 	if err != nil {
 		panic(err)
 	}
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)
-	var mydata interface{}
-	json.Unmarshal(byteValue, &mydata)
+	var data interface{}
+
+	s2 := strings.Split(s, ".")
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		json.Unmarshal(byteValue, &mydata)
+		json.Unmarshal(byteValue, &data)
+		_ = deeper(data, s2...)
 	}
 	b.StopTimer()
 }

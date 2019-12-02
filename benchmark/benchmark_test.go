@@ -51,7 +51,7 @@ func Benchmark_LargeFile_GJson(b *testing.B) {
 }
 
 func Benchmark_SmallFile_unjson(b *testing.B) {
-	data := unjson.LoadFile("large.json")
+	data := unjson.LoadFile("small.json")
 
 	path1 := "widget.window.name"
 	path2 := "widget.image.hOffset"

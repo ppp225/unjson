@@ -10,7 +10,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// LoadFile reads file from disk and unmarshalls
+// LoadFile reads file from disk
 func LoadFile(filename string) string {
 	jsonFile, err := os.Open(filename)
 	if err != nil {
@@ -18,8 +18,6 @@ func LoadFile(filename string) string {
 	}
 
 	jsonBytes, _ := ioutil.ReadAll(jsonFile)
-	// var jsonData interface{}
-	// json.Unmarshal(jsonBytes, &jsonData)
 	return string(jsonBytes[:])
 }
 
@@ -35,45 +33,6 @@ func parsePath2DotNotation(path string) (result string) {
 	result = strings.ReplaceAll(result, "]", "")
 
 	return
-}
-
-func parseJsonPath(path string) []string {
-	n := strings.Count(path, ".") + 1
-	n += strings.Count(path, "[")
-	result := make([]string, n)
-	current := 0
-	lastPos := 0
-	skipNext := false // in case '].'; writes on ']' and skips '.'
-	for pos, char := range path {
-		if skipNext {
-			skipNext = false
-			continue
-		}
-		switch char {
-		case '.':
-			result[current] = path[lastPos:pos]
-			lastPos = pos + 1
-			current++
-			break
-		case '[':
-			result[current] = path[lastPos:pos]
-			lastPos = pos + 1
-			current++
-			break
-		case ']':
-			result[current] = path[lastPos:pos]
-			lastPos = pos + 2
-			current++
-			skipNext = true
-			break
-		default:
-			continue
-		}
-	}
-	if !skipNext {
-		result[current] = path[lastPos:]
-	}
-	return result
 }
 
 func deeper(data interface{}, params ...string) interface{} {
